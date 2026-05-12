@@ -219,6 +219,28 @@
             knowledge: "📚"
         };
 
+        // Корректное декодирование base64 с UTF-8
+        function decodeBase64(str) {
+            try {
+                // Заменяем URL-safe символы обратно
+                str = str.replace(/-/g, '+').replace(/_/g, '/');
+                // Добавляем padding если нужно
+                while (str.length % 4) {
+                    str += '=';
+                }
+                // Декодируем через Uint8Array для поддержки UTF-8
+                const binary = atob(str);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) {
+                    bytes[i] = binary.charCodeAt(i);
+                }
+                return new TextDecoder('utf-8').decode(bytes);
+            } catch (e) {
+                console.error("Decode error:", e);
+                return null;
+            }
+        }
+
         function renderCard(data) {
             const content = document.getElementById('content');
 
@@ -260,9 +282,13 @@
             if (!b64) {
                 showError('❌ Нет данных карточки. Откройте через бота.');
             } else {
-                const json = atob(b64);
-                const data = JSON.parse(json);
-                renderCard(data);
+                const json = decodeBase64(b64);
+                if (!json) {
+                    showError('❌ Ошибка декодирования данных. Попробуйте обновить карточку.');
+                } else {
+                    const data = JSON.parse(json);
+                    renderCard(data);
+                }
             }
         } catch (e) {
             showError('❌ Ошибка загрузки карточки: ' + e.message);
