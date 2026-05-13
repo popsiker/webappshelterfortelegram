@@ -232,49 +232,39 @@
             margin-bottom: 2px;
         }
 
-        /* Flip Card Container */
-        .flip-container {
-            position: relative;
-            min-height: 24px;
-        }
-
-        .flip-card {
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
-        }
-
-        .flip-card.flipped {
-            transform: rotateY(180deg);
-        }
-
-        .flip-front, .flip-back {
-            backface-visibility: hidden;
+        .stat-display {
             display: flex;
             align-items: center;
             gap: 6px;
         }
 
-        .flip-back {
-            position: absolute;
-            top: 0;
-            left: 0;
-            transform: rotateY(180deg);
-        }
-
         .stat-value {
             font-size: 13px;
-            color: var(--text-primary);
+            color: #e0e0e0;
             line-height: 1.4;
             word-break: break-word;
         }
 
+        [data-theme="light"] .stat-value {
+            color: #1a1a2e;
+        }
+
         .stat-value.hidden {
-            color: var(--text-secondary);
+            color: #aaaaaa;
             font-style: italic;
         }
 
+        [data-theme="light"] .stat-value.hidden {
+            color: #666666;
+        }
+
         .stat-value.revealed {
-            color: var(--success);
+            color: #4ecca3;
+            font-weight: 600;
+        }
+
+        [data-theme="light"] .stat-value.revealed {
+            color: #1a7a50;
         }
 
         .lock-icon { font-size: 14px; }
@@ -534,6 +524,7 @@
         }
     </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
     <div class="header">
@@ -614,7 +605,6 @@
         let ws = null;
         let lastDataHash = "";
         let autoUpdateInterval = null;
-        let revealedStates = new Set(); // Отслеживаем что уже анимировали
 
         // Theme
         function initTheme() {
@@ -668,60 +658,33 @@
             document.getElementById('progressText').textContent = `${revealed}/${total}`;
         }
 
-        // Render stat with flip animation
+        // Render stat
         function renderStat(key, item, isMe, playerId) {
             const isRevealed = item.revealed;
             const label = LABELS[key] || key;
             const icon = ICONS[key] || "•";
             const value = item.value || "";
             const stateKey = `${playerId}_${key}`;
-            const wasRevealed = revealedStates.has(stateKey);
-            const isNewReveal = isRevealed && !wasRevealed;
-
-            if (isRevealed) revealedStates.add(stateKey);
-
-            const animClass = isNewReveal ? 'reveal-animation' : '';
 
             let innerHtml;
             if (isRevealed) {
                 innerHtml = `
-                    <div class="flip-container">
-                        <div class="flip-card ${isNewReveal ? 'flipped' : ''}">
-                            <div class="flip-front">
-                                <span class="lock-icon lock-unlocked">🔓</span>
-                                <span class="stat-value revealed">${value}</span>
-                            </div>
-                        </div>
+                    <div class="stat-display">
+                        <span class="lock-icon lock-unlocked">🔓</span>
+                        <span class="stat-value revealed">${value}</span>
                     </div>
                 `;
             } else {
-                if (isMe) {
-                    innerHtml = `
-                        <div class="flip-container">
-                            <div class="flip-card">
-                                <div class="flip-front">
-                                    <span class="lock-icon lock-locked">🔒</span>
-                                    <span class="stat-value hidden">${value}</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    innerHtml = `
-                        <div class="flip-container">
-                            <div class="flip-card">
-                                <div class="flip-front">
-                                    <span class="lock-icon lock-locked">🔒</span>
-                                    <span class="stat-value hidden">Скрыто</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
+                innerHtml = `
+                    <div class="stat-display">
+                        <span class="lock-icon lock-locked">🔒</span>
+                        <span class="stat-value hidden">${isMe ? value : 'Скрыто'}</span>
+                    </div>
+                `;
             }
 
             return `
-                <div class="stat-row ${animClass}" data-key="${stateKey}">
+                <div class="stat-row" data-key="${stateKey}">
                     <div class="stat-icon">${icon}</div>
                     <div class="stat-content">
                         <div class="stat-label">${label}</div>
