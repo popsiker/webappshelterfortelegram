@@ -87,6 +87,38 @@
             font-size: 12px;
         }
 
+        /* Refresh Button */
+        .refresh-btn {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(78, 204, 163, 0.15);
+            border: 1px solid rgba(78, 204, 163, 0.3);
+            color: var(--success);
+            padding: 4px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(78, 204, 163, 0.3);
+        }
+
+        .refresh-btn.spinning .refresh-icon {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         /* Progress Bar */
         .progress-container {
             padding: 10px 20px;
@@ -339,127 +371,251 @@
             transform: scale(1.3);
         }
 
-        /* Chat */
-        .chat-container {
+        /* ===== ЧАТ ===== */
+
+        /* Кнопка открытия чата */
+        .chat-fab {
             position: fixed;
-            bottom: 50px;
-            right: 10px;
-            width: 280px;
-            max-height: 300px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            z-index: 100;
-            overflow: hidden;
-            transition: transform 0.3s, opacity 0.3s;
-        }
-
-        .chat-container.collapsed {
-            transform: translateY(calc(100% - 40px));
-        }
-
-        .chat-header {
-            padding: 8px 12px;
-            background: rgba(233, 69, 96, 0.2);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            color: white;
+            font-size: 24px;
             cursor: pointer;
+            z-index: 200;
+            box-shadow: 0 4px 16px rgba(233, 69, 96, 0.4);
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .chat-title {
-            font-size: 12px;
+        .chat-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 24px rgba(233, 69, 96, 0.6);
+        }
+
+        .chat-fab:active {
+            transform: scale(0.95);
+        }
+
+        .chat-fab .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ff4757;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+        }
+
+        /* Оверлей чата */
+        .chat-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .chat-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        /* Шапка чата */
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chat-header-title {
+            font-size: 18px;
             font-weight: bold;
             color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .chat-toggle {
+        .chat-header-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .chat-close {
             background: none;
-            border: none;
+            border: 1px solid var(--border);
             color: var(--accent);
-            font-size: 16px;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
             cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
 
+        .chat-close:hover {
+            background: rgba(233, 69, 96, 0.2);
+        }
+
+        /* Сообщения */
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 8px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 12px;
         }
 
         .chat-message {
-            padding: 5px 8px;
-            border-radius: 10px;
-            font-size: 12px;
-            max-width: 90%;
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.4;
             word-break: break-word;
+            animation: messageIn 0.3s ease-out;
         }
 
         .chat-message.me {
-            background: rgba(233, 69, 96, 0.2);
+            background: var(--accent);
+            color: white;
             align-self: flex-end;
-            border-bottom-right-radius: 2px;
+            border-bottom-right-radius: 4px;
         }
 
         .chat-message.other {
-            background: rgba(255,255,255,0.1);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
             align-self: flex-start;
-            border-bottom-left-radius: 2px;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-message.system {
+            background: rgba(78, 204, 163, 0.15);
+            border: 1px solid rgba(78, 204, 163, 0.3);
+            color: var(--success);
+            align-self: center;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 12px;
         }
 
         .chat-author {
-            font-size: 9px;
-            color: var(--accent);
-            margin-bottom: 1px;
+            font-size: 11px;
             font-weight: bold;
+            margin-bottom: 3px;
+            opacity: 0.8;
         }
 
-        .chat-input-container {
-            display: flex;
-            padding: 6px;
+        .chat-time {
+            font-size: 10px;
+            opacity: 0.6;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        /* Поле ввода */
+        .chat-input-area {
+            padding: 12px 16px 24px 16px;
+            background: var(--bg-secondary);
             border-top: 1px solid var(--border);
-            gap: 4px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
         }
 
         .chat-input {
             flex: 1;
-            background: rgba(255,255,255,0.1);
+            background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 6px 10px;
+            border-radius: 20px;
+            padding: 12px 16px;
             color: var(--text-primary);
-            font-size: 12px;
+            font-size: 16px;
             outline: none;
+            resize: none;
+            min-height: 44px;
+            max-height: 120px;
+            font-family: inherit;
+            line-height: 1.4;
         }
 
         .chat-input::placeholder {
             color: var(--text-secondary);
         }
 
-        .chat-send {
-            background: var(--accent);
-            border: none;
-            border-radius: 10px;
-            padding: 6px 12px;
-            color: white;
-            font-size: 12px;
-            cursor: pointer;
-            transition: opacity 0.2s;
+        .chat-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.2);
         }
 
-        .chat-send:hover { opacity: 0.8; }
+        .chat-send-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
 
-        .chat-status {
-            font-size: 9px;
-            color: var(--text-secondary);
+        .chat-send-btn:hover {
+            background: #ff6b81;
+            transform: scale(1.05);
+        }
+
+        .chat-send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Пустое состояние */
+        .chat-empty {
             text-align: center;
-            padding: 2px;
+            color: var(--text-secondary);
+            padding: 40px 20px;
+            font-size: 14px;
+        }
+
+        .chat-empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.5;
         }
 
         /* Footer */
@@ -473,6 +629,7 @@
             font-size: 9px;
             color: var(--text-secondary);
             background: rgba(0,0,0,0.3);
+            z-index: 5;
         }
 
         [data-theme="light"] .footer {
@@ -484,6 +641,31 @@
             padding: 30px;
             color: var(--accent);
             font-size: 14px;
+        }
+
+        .error-box {
+            background: rgba(233, 69, 96, 0.1);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .error-box .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .error-box h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .error-box p {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.5;
         }
 
         /* Animations */
@@ -501,6 +683,11 @@
             0% { background: transparent; }
             50% { background: rgba(78, 204, 163, 0.3); }
             100% { background: transparent; }
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .card-wrapper {
@@ -530,13 +717,21 @@
             .card { padding: 15px; }
             .player-name { font-size: 17px; }
             .nav-btn { width: 35px; height: 35px; font-size: 20px; }
-            .chat-container { width: calc(100vw - 20px); right: 10px; left: 10px; }
+            .chat-fab { width: 50px; height: 50px; font-size: 20px; bottom: 16px; right: 16px; }
+            .chat-message { max-width: 90%; font-size: 13px; }
+            .chat-input { font-size: 16px; }
+            .refresh-btn { font-size: 11px; padding: 3px 8px; }
         }
     </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
     <div class="header">
+        <button class="refresh-btn" id="refreshBtn">
+            <span class="refresh-icon">🔄</span>
+            <span>Обновить</span>
+        </button>
         <h1>☢️ БУНКЕР</h1>
         <div class="subtitle">Карточки игроков</div>
         <button class="theme-toggle" id="themeToggle">🌙</button>
@@ -559,17 +754,31 @@
         <div class="pagination" id="pagination"></div>
     </div>
 
-    <!-- Chat -->
-    <div class="chat-container collapsed" id="chatContainer">
-        <div class="chat-header" id="chatHeader">
-            <span class="chat-title">💬 Чат бункера</span>
-            <button class="chat-toggle" id="chatToggle">▲</button>
+    <!-- Кнопка чата -->
+    <button class="chat-fab" id="chatFab">
+        💬
+        <span class="badge" id="chatBadge" style="display:none">0</span>
+    </button>
+
+    <!-- Оверлей чата -->
+    <div class="chat-overlay" id="chatOverlay">
+        <div class="chat-header">
+            <div>
+                <div class="chat-header-title">💬 Чат бункера</div>
+                <div class="chat-header-status" id="chatStatus">💡 Локальный режим — сообщения видны только тебе</div>
+            </div>
+            <button class="chat-close" id="chatClose">✕</button>
         </div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-status" id="chatStatus">Подключение...</div>
-        <div class="chat-input-container">
-            <input type="text" class="chat-input" id="chatInput" placeholder="Написать сообщение...">
-            <button class="chat-send" id="chatSend">➤</button>
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-empty">
+                <div class="chat-empty-icon">💬</div>
+                <div>Нет сообщений</div>
+                <div style="font-size:12px; margin-top:8px; opacity:0.7;">Напиши первое сообщение!</div>
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <textarea class="chat-input" id="chatInput" placeholder="Написать сообщение..." rows="1"></textarea>
+            <button class="chat-send-btn" id="chatSend">➤</button>
         </div>
     </div>
 
@@ -611,10 +820,12 @@
         let currentIndex = 0;
         let players = [];
         let myId = null;
-        let ws = null;
         let lastDataHash = "";
         let autoUpdateInterval = null;
-        let revealedStates = new Set(); // Отслеживаем что уже анимировали
+        let revealedStates = new Set();
+        let unreadCount = 0;
+        let isChatOpen = false;
+        let chatMessages = [];
 
         // Theme
         function initTheme() {
@@ -768,7 +979,15 @@
 
         function initCarousel() {
             if (!players.length) {
-                document.getElementById('track').innerHTML = '<div class="error">❌ Нет данных</div>';
+                document.getElementById('track').innerHTML = `
+                    <div class="card-wrapper">
+                        <div class="error-box">
+                            <div class="icon">📭</div>
+                            <h3>Нет данных</h3>
+                            <p>Карточки игроков не загружены. Нажми кнопку «🌐 Карточки игроков» в боте или «🔄 Обновить» сверху.</p>
+                        </div>
+                    </div>
+                `;
                 return;
             }
 
@@ -825,102 +1044,170 @@
             if (e.key === 'ArrowRight' && currentIndex < players.length - 1) { currentIndex++; updateCarousel(); }
         });
 
-        // Chat
-        const chatContainer = document.getElementById('chatContainer');
-        const chatHeader = document.getElementById('chatHeader');
-        const chatToggle = document.getElementById('chatToggle');
+        // ===== ОБНОВЛЕНИЕ =====
+        const refreshBtn = document.getElementById('refreshBtn');
 
-        chatHeader.addEventListener('click', () => {
-            chatContainer.classList.toggle('collapsed');
-            chatToggle.textContent = chatContainer.classList.contains('collapsed') ? '▲' : '▼';
+        refreshBtn.addEventListener('click', () => {
+            refreshBtn.classList.add('spinning');
+
+            // Пробуем перезагрузить данные из URL
+            loadData();
+
+            // Если Telegram WebApp доступен, пробуем получить свежие данные через initData
+            if (window.Telegram?.WebApp) {
+                try {
+                    const tg = Telegram.WebApp;
+                    // Показываем пользователю, что обновление запрошено
+                    tg.showPopup({
+                        title: '🔄 Обновление',
+                        message: 'Данные обновлены! Если карточки не изменились, нажми «🌐 Карточки игроков» в боте для получения актуальных данных.',
+                        buttons: [{type: 'ok'}]
+                    });
+                } catch (e) {
+                    console.log('Telegram popup error:', e);
+                }
+            }
+
+            setTimeout(() => {
+                refreshBtn.classList.remove('spinning');
+            }, 1000);
         });
 
-        chatToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            chatContainer.classList.toggle('collapsed');
-            chatToggle.textContent = chatContainer.classList.contains('collapsed') ? '▲' : '▼';
-        });
+        // ===== ЧАТ =====
+        const chatFab = document.getElementById('chatFab');
+        const chatOverlay = document.getElementById('chatOverlay');
+        const chatClose = document.getElementById('chatClose');
+        const chatInput = document.getElementById('chatInput');
+        const chatSend = document.getElementById('chatSend');
+        const chatMessagesEl = document.getElementById('chatMessages');
+        const chatBadge = document.getElementById('chatBadge');
 
-        function addChatMessage(text, author, isMe) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `chat-message ${isMe ? 'me' : 'other'}`;
-            msgDiv.innerHTML = `<div class="chat-author">${author}</div><div>${text}</div>`;
-            const container = document.getElementById('chatMessages');
-            container.appendChild(msgDiv);
-            container.scrollTop = container.scrollHeight;
+        function openChat() {
+            isChatOpen = true;
+            unreadCount = 0;
+            chatBadge.style.display = 'none';
+            chatOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => chatInput.focus(), 300);
+            scrollToBottom();
         }
 
-        function initChat() {
-            // WebSocket подключение (замени URL на свой сервер)
-            const wsUrl = 'wss://your-websocket-server.com/chat';
+        function closeChat() {
+            isChatOpen = false;
+            chatOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            chatInput.blur();
+        }
 
-            try {
-                ws = new WebSocket(wsUrl);
+        function scrollToBottom() {
+            chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+        }
 
-                ws.onopen = () => {
-                    document.getElementById('chatStatus').textContent = '✅ Подключено';
-                    // Отправляем ID для идентификации
-                    ws.send(JSON.stringify({type: 'join', userId: myId, gameId: getGameId()}));
-                };
-
-                ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    if (data.type === 'message') {
-                        addChatMessage(data.text, data.author, data.userId === myId);
-                    }
-                };
-
-                ws.onclose = () => {
-                    document.getElementById('chatStatus').textContent = '❌ Отключено. Переподключение...';
-                    setTimeout(initChat, 3000);
-                };
-
-                ws.onerror = () => {
-                    document.getElementById('chatStatus').textContent = '⚠️ Ошибка соединения';
-                };
-            } catch (e) {
-                document.getElementById('chatStatus').textContent = '⚠️ Чат недоступен (нет сервера)';
+        function updateBadge() {
+            if (!isChatOpen && unreadCount > 0) {
+                chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                chatBadge.style.display = 'flex';
             }
         }
 
-        document.getElementById('chatSend').addEventListener('click', sendChatMessage);
-        document.getElementById('chatInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendChatMessage();
-        });
+        function formatTime(date) {
+            return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+        }
 
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const text = input.value.trim();
+        function addMessage(text, author, type = 'other') {
+            const msg = {
+                text,
+                author,
+                type,
+                time: new Date()
+            };
+            chatMessages.push(msg);
+
+            // Убираем пустое состояние
+            if (chatMessages.length === 1) {
+                chatMessagesEl.innerHTML = '';
+            }
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `chat-message ${type}`;
+
+            if (type === 'system') {
+                msgDiv.innerHTML = `<div>${text}</div>`;
+            } else {
+                msgDiv.innerHTML = `
+                    <div class="chat-author">${author}</div>
+                    <div>${text}</div>
+                    <div class="chat-time">${formatTime(msg.time)}</div>
+                `;
+            }
+
+            chatMessagesEl.appendChild(msgDiv);
+            scrollToBottom();
+
+            if (!isChatOpen) {
+                unreadCount++;
+                updateBadge();
+            }
+        }
+
+        function sendMessage() {
+            const text = chatInput.value.trim();
             if (!text) return;
 
             const me = players.find(p => p.id === myId);
             const author = me ? me.name : `Игрок ${myId}`;
 
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({type: 'message', text, userId: myId, author}));
-            } else {
-                // Fallback: показываем только локально
-                addChatMessage(text, author + ' (только ты)', true);
+            addMessage(text, author, 'me');
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+        }
+
+        // Auto-resize textarea
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
             }
-            input.value = '';
-        }
+        });
 
-        function getGameId() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('g') || 'default';
-        }
+        chatFab.addEventListener('click', openChat);
+        chatClose.addEventListener('click', closeChat);
+        chatSend.addEventListener('click', sendMessage);
 
-        // Auto-update via polling (fallback if no WebSocket for data)
+        // Закрытие по клику на оверлей (вне чата)
+        chatOverlay.addEventListener('click', (e) => {
+            if (e.target === chatOverlay) closeChat();
+        });
+
+        // Escape для закрытия
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isChatOpen) closeChat();
+        });
+
+        // Закрытие свайпом вниз (для мобильных)
+        let touchStartY = 0;
+        chatOverlay.addEventListener('touchstart', (e) => {
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        chatOverlay.addEventListener('touchend', (e) => {
+            const diff = touchStartY - e.changedTouches[0].screenY;
+            if (diff < -100 && isChatOpen) closeChat();
+        }, { passive: true });
+
+        // Auto-update via polling
         function startAutoUpdate() {
-            // Проверяем URL на изменения данных каждые 5 секунд
             autoUpdateInterval = setInterval(() => {
                 checkForUpdates();
             }, 5000);
         }
 
         function checkForUpdates() {
-            // В реальности здесь должен быть запрос к API бота
-            // Сейчас просто обновляем прогресс-бар
             updateProgress();
         }
 
@@ -931,36 +1218,84 @@
                 const b64 = params.get('d');
 
                 if (!b64) {
-                    document.getElementById('track').innerHTML = '<div class="error">❌ Нет данных. Откройте через бота.</div>';
+                    document.getElementById('track').innerHTML = `
+                        <div class="card-wrapper">
+                            <div class="error-box">
+                                <div class="icon">🔗</div>
+                                <h3>Нет данных в URL</h3>
+                                <p>Откройте карточки через кнопку «🌐 Карточки игроков» в боте Telegram.</p>
+                            </div>
+                        </div>
+                    `;
                     return;
                 }
 
                 const json = decodeBase64(b64);
-                if (!json) throw new Error("Decode failed");
+                if (!json) throw new Error("Ошибка декодирования Base64");
+
                 const data = JSON.parse(json);
+
+                // Проверяем структуру данных
+                if (!data.players || !Array.isArray(data.players)) {
+                    throw new Error("Неверная структура данных: отсутствует массив players");
+                }
+
+                if (data.players.length === 0) {
+                    throw new Error("Список игроков пуст");
+                }
 
                 const newHash = hashData(data);
                 if (newHash !== lastDataHash) {
                     lastDataHash = newHash;
-                    players = data.players || [];
+                    players = data.players;
                     myId = data.myId || null;
                     initCarousel();
+
+                    // Показываем уведомление об обновлении
+                    if (document.getElementById('track').children.length > 0) {
+                        document.getElementById('updateStatus').textContent = '✅ Данные загружены';
+                        setTimeout(() => {
+                            document.getElementById('updateStatus').textContent = '🔄 Автообновление: вкл';
+                        }, 3000);
+                    }
                 }
             } catch (e) {
-                document.getElementById('track').innerHTML = `<div class="error">❌ Ошибка: ${e.message}</div>`;
+                console.error("Load data error:", e);
+                document.getElementById('track').innerHTML = `
+                    <div class="card-wrapper">
+                        <div class="error-box">
+                            <div class="icon">⚠️</div>
+                            <h3>Ошибка загрузки</h3>
+                            <p>${e.message}</p>
+                            <p style="margin-top:10px; font-size:12px;">Попробуй нажать «🔄 Обновить» или открыть карточки заново через бота.</p>
+                        </div>
+                    </div>
+                `;
             }
         }
 
         // Init
         initTheme();
         loadData();
-        initChat();
         startAutoUpdate();
+
+        // Добавляем системное сообщение о режиме чата
+        addMessage('💡 Чат работает в локальном режиме. Сообщения видны только на этом устройстве. Для общего чата нужен сервер.', 'Система', 'system');
 
         if (window.Telegram && Telegram.WebApp) {
             Telegram.WebApp.ready();
             Telegram.WebApp.expand();
             Telegram.WebApp.onEvent('themeChanged', initTheme);
+
+            // Пробуем получить данные из initDataUnsafe если есть
+            try {
+                const initData = Telegram.WebApp.initDataUnsafe;
+                if (initData && initData.user) {
+                    console.log('Telegram user:', initData.user);
+                }
+            } catch (e) {
+                console.log('initData error:', e);
+            }
         }
     </script>
 </body>
