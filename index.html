@@ -712,7 +712,7 @@
         }
 
         function renderCard(player) {
-            const isMe = player.id === myId;
+            const isMe = (player.id === myId) || !!player.isMe;
             const badgeClass = isMe ? 'badge-me' : 'badge-other';
             const badgeText = isMe ? '👤 ТВОЯ КАРТОЧКА' : '👥 ИГРОК';
 
@@ -905,7 +905,7 @@
             updateProgress();
         }
 
-        // Load data from URL parameter (base64 or zlib-compressed)
+        // Load data from URL parameter (base64-encoded JSON)
         async function loadData() {
             try {
                 const params = new URLSearchParams(window.location.search);
@@ -922,35 +922,38 @@
                     return;
                 }
 
-                // Handle compact format
-                if (data.m !== undefined) {
-                    myId = data.m;
+                // Новый компактный формат: {id, p: [{i, n, c, me?, ac?, cc?}]}
+                if (data.p !== undefined) {
+                    myId = data.id || data.myId || null;
                     players = (data.p || []).map(p => ({
-                        id: p.id,
-                        name: p.nm,
-                        chars: Object.fromEntries(Object.entries(p.ch || {}).map(([k, v]) => [k, {
+                        id: p.i,
+                        name: p.n,
+                        chars: Object.fromEntries(Object.entries(p.c || {}).map(([k, v]) => [k, {
                             value: v.v || '',
-                            revealed: v.r === 1
+                            revealed: !!v.r
                         }])),
                         action_card: p.ac ? {
                             type: 'action',
-                            name: p.ac.n,
-                            desc: p.ac.d,
-                            revealed: p.ac.rv === 1,
-                            used: p.ac.u === 1
+                            name: p.ac.n || '',
+                            desc: p.ac.d || '',
+                            revealed: !!p.ac.r || !!p.me,
+                            used: !!p.ac.u
                         } : null,
                         condition_card: p.cc ? {
-                            type: 'condition', 
-                            name: p.cc.n,
-                            desc: p.cc.d,
-                            revealed: p.cc.rv === 1,
-                            used: p.cc.u === 1
+                            type: 'condition',
+                            name: p.cc.n || '',
+                            desc: p.cc.d || '',
+                            revealed: !!p.cc.r || !!p.me,
+                            used: !!p.cc.u
                         } : null
                     }));
-                } else {
-                    // Legacy format
+                } else if (data.players !== undefined) {
+                    // Старый формат (legacy)
                     myId = data.myId || null;
                     players = data.players || [];
+                } else {
+                    document.getElementById('track').innerHTML = '<div class="error">❌ Неизвестный формат данных.</div>';
+                    return;
                 }
 
                 initCarousel();
