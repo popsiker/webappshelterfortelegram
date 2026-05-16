@@ -681,50 +681,90 @@
                 statsHtml += renderStat(key, player.chars[key], isMe, player.id);
             });
 
-            // Render player's card (action or condition)
-            let cardHtml = '';
-            if (player.card) {
-                const card = player.card;
+            // Render action card
+            let actionCardHtml = '';
+            if (player.action_card) {
+                const card = player.action_card;
                 const isCardRevealed = card.revealed || isMe;
-                const cardType = card.type || 'action';
-                const cardIcon = CARD_ICONS[cardType] || "🃏";
-                const cardTypeLabel = CARD_TYPE_LABELS[cardType] || "Карта";
                 const cardClass = isCardRevealed ? 'game-card' : 'game-card hidden-card';
                 const cardStatus = card.used 
                     ? '<span class="status-used">✅ Использована</span>' 
                     : (isCardRevealed ? '<span class="status-active">🟢 Активна</span>' : '<span class="status-hidden">🔒 Скрыта</span>');
 
                 if (isCardRevealed) {
-                    cardHtml = `
-                        <div class="card-section">
-                            <div class="card-section-title">${cardIcon} Карта игрока</div>
-                            <div class="${cardClass}">
-                                <div class="game-card-header">
-                                    <span class="game-card-icon">${cardIcon}</span>
-                                    <span class="game-card-name">${card.name || 'Без названия'}</span>
-                                    <span class="game-card-type ${cardType}">${cardTypeLabel}</span>
-                                </div>
-                                <div class="game-card-desc">${card.desc || ''}</div>
-                                <div class="game-card-status">${cardStatus}</div>
+                    actionCardHtml = `
+                        <div class="game-card">
+                            <div class="game-card-header">
+                                <span class="game-card-icon">🎴</span>
+                                <span class="game-card-name">${card.name || 'Без названия'}</span>
+                                <span class="game-card-type action">Карта действия</span>
                             </div>
+                            <div class="game-card-desc">${card.desc || ''}</div>
+                            <div class="game-card-status">${cardStatus}</div>
                         </div>
                     `;
                 } else {
-                    cardHtml = `
-                        <div class="card-section">
-                            <div class="card-section-title">${cardIcon} Карта игрока</div>
-                            <div class="${cardClass}">
-                                <div class="game-card-header">
-                                    <span class="game-card-icon">🔒</span>
-                                    <span class="game-card-name">Скрытая карта</span>
-                                    <span class="game-card-type ${cardType}">${cardTypeLabel}</span>
-                                </div>
-                                <div class="game-card-desc">Условие или действие будет раскрыто при использовании или срабатывании...</div>
-                                <div class="game-card-status">${cardStatus}</div>
+                    actionCardHtml = `
+                        <div class="game-card hidden-card">
+                            <div class="game-card-header">
+                                <span class="game-card-icon">🔒</span>
+                                <span class="game-card-name">Скрытая карта</span>
+                                <span class="game-card-type action">Карта действия</span>
                             </div>
+                            <div class="game-card-desc">Действие будет раскрыто при использовании...</div>
+                            <div class="game-card-status">${cardStatus}</div>
                         </div>
                     `;
                 }
+            }
+
+            // Render condition card
+            let conditionCardHtml = '';
+            if (player.condition_card) {
+                const card = player.condition_card;
+                const isCardRevealed = card.revealed || isMe;
+                const cardClass = isCardRevealed ? 'game-card' : 'game-card hidden-card';
+                const cardStatus = card.used 
+                    ? '<span class="status-used">✅ Сработала</span>' 
+                    : (isCardRevealed ? '<span class="status-active">🟢 Ожидает</span>' : '<span class="status-hidden">🔒 Скрыта</span>');
+
+                if (isCardRevealed) {
+                    conditionCardHtml = `
+                        <div class="game-card">
+                            <div class="game-card-header">
+                                <span class="game-card-icon">📜</span>
+                                <span class="game-card-name">${card.name || 'Без названия'}</span>
+                                <span class="game-card-type condition">Карта условия</span>
+                            </div>
+                            <div class="game-card-desc">${card.desc || ''}</div>
+                            <div class="game-card-status">${cardStatus}</div>
+                        </div>
+                    `;
+                } else {
+                    conditionCardHtml = `
+                        <div class="game-card hidden-card">
+                            <div class="game-card-header">
+                                <span class="game-card-icon">🔒</span>
+                                <span class="game-card-name">Скрытая карта</span>
+                                <span class="game-card-type condition">Карта условия</span>
+                            </div>
+                            <div class="game-card-desc">Условие будет раскрыто при срабатывании...</div>
+                            <div class="game-card-status">${cardStatus}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Combine cards section
+            let cardsSection = '';
+            if (actionCardHtml || conditionCardHtml) {
+                cardsSection = `
+                    <div class="card-section">
+                        <div class="card-section-title">🃏 Карты игрока</div>
+                        ${actionCardHtml}
+                        ${conditionCardHtml}
+                    </div>
+                `;
             }
 
             return `
@@ -735,7 +775,7 @@
                         </div>
                         <div class="player-name">${player.name || 'Неизвестный'}</div>
                         ${statsHtml}
-                        ${cardHtml}
+                        ${cardsSection}
                         ${isMe ? '<div class="swipe-hint">👆 Свайпай для просмотра других игроков</div>' : ''}
                     </div>
                 </div>
