@@ -547,6 +547,8 @@
         };
 
         const LABELS = {
+            age: "Возраст",
+            gender: "Пол",
             profession: "Профессия",
             health: "Здоровье",
             baggage: "Багаж",
@@ -562,6 +564,8 @@
         };
 
         const ICONS = {
+            age: "🎂",
+            gender: "⚧",
             profession: "💼",
             health: "❤️",
             baggage: "🎒",
@@ -839,7 +843,7 @@
                 return;
             }
 
-            const myIndex = players.findIndex(p => p.id === myId);
+            const myIndex = players.findIndex(p => p.isMe || p.id === myId);
             if (myIndex > 0) {
                 const [me] = players.splice(myIndex, 1);
                 players.unshift(me);
@@ -928,6 +932,7 @@
                     players = (data.p || []).map(p => ({
                         id: p.i,
                         name: p.n,
+                        isMe: !!p.me,
                         chars: Object.fromEntries(Object.entries(p.c || {}).map(([k, v]) => [k, {
                             value: v.v || '',
                             revealed: !!v.r
@@ -936,14 +941,14 @@
                             type: 'action',
                             name: p.ac.n || '',
                             desc: p.ac.d || '',
-                            revealed: !!p.ac.r || !!p.me,
+                            revealed: !!p.me,
                             used: !!p.ac.u
                         } : null,
                         condition_card: p.cc ? {
                             type: 'condition',
                             name: p.cc.n || '',
                             desc: p.cc.d || '',
-                            revealed: !!p.cc.r || !!p.me,
+                            revealed: !!p.me,
                             used: !!p.cc.u
                         } : null
                     }));
