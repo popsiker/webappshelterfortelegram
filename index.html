@@ -292,6 +292,111 @@
             backdrop-filter: blur(5px);
         }
 
+        /* Card Section */
+        .card-section {
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .card-section-title {
+            font-size: 11px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .game-card {
+            background: linear-gradient(135deg, rgba(233, 69, 96, 0.1) 0%, rgba(78, 204, 163, 0.1) 100%);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(233, 69, 96, 0.2);
+        }
+
+        .game-card.hidden-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-style: dashed;
+        }
+
+        .game-card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .game-card-icon {
+            font-size: 18px;
+        }
+
+        .game-card-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .game-card-type {
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+
+        .game-card-type.action {
+            background: rgba(233, 69, 96, 0.2);
+            color: var(--accent);
+        }
+
+        .game-card-type.condition {
+            background: rgba(78, 204, 163, 0.2);
+            color: var(--success);
+        }
+
+        .game-card-desc {
+            font-size: 11px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .game-card-status {
+            font-size: 10px;
+            margin-top: 6px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .status-used {
+            color: #888;
+            text-decoration: line-through;
+        }
+
+        .status-active {
+            color: var(--success);
+        }
+
+        .status-hidden {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        [data-theme="light"] .game-card {
+            background: linear-gradient(135deg, rgba(214, 51, 108, 0.08) 0%, rgba(43, 138, 62, 0.08) 100%);
+        }
+
+        [data-theme="light"] .game-card.hidden-card {
+            background: rgba(0, 0, 0, 0.03);
+        }
         .nav-btn:hover {
             background: rgba(233, 69, 96, 0.3);
             transform: translateY(-50%) scale(1.1);
@@ -401,6 +506,7 @@
     </style>
 <base target="_blank">
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
     <div class="header">
@@ -430,6 +536,16 @@
     </div>
 
     <script>
+        const CARD_TYPE_LABELS = {
+            action: "Карта действия",
+            condition: "Карта условия"
+        };
+
+        const CARD_ICONS = {
+            action: "🎴",
+            condition: "📜"
+        };
+
         const LABELS = {
             profession: "Профессия",
             health: "Здоровье",
@@ -565,6 +681,52 @@
                 statsHtml += renderStat(key, player.chars[key], isMe, player.id);
             });
 
+            // Render player's card (action or condition)
+            let cardHtml = '';
+            if (player.card) {
+                const card = player.card;
+                const isCardRevealed = card.revealed || isMe;
+                const cardType = card.type || 'action';
+                const cardIcon = CARD_ICONS[cardType] || "🃏";
+                const cardTypeLabel = CARD_TYPE_LABELS[cardType] || "Карта";
+                const cardClass = isCardRevealed ? 'game-card' : 'game-card hidden-card';
+                const cardStatus = card.used 
+                    ? '<span class="status-used">✅ Использована</span>' 
+                    : (isCardRevealed ? '<span class="status-active">🟢 Активна</span>' : '<span class="status-hidden">🔒 Скрыта</span>');
+
+                if (isCardRevealed) {
+                    cardHtml = `
+                        <div class="card-section">
+                            <div class="card-section-title">${cardIcon} Карта игрока</div>
+                            <div class="${cardClass}">
+                                <div class="game-card-header">
+                                    <span class="game-card-icon">${cardIcon}</span>
+                                    <span class="game-card-name">${card.name || 'Без названия'}</span>
+                                    <span class="game-card-type ${cardType}">${cardTypeLabel}</span>
+                                </div>
+                                <div class="game-card-desc">${card.desc || ''}</div>
+                                <div class="game-card-status">${cardStatus}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    cardHtml = `
+                        <div class="card-section">
+                            <div class="card-section-title">${cardIcon} Карта игрока</div>
+                            <div class="${cardClass}">
+                                <div class="game-card-header">
+                                    <span class="game-card-icon">🔒</span>
+                                    <span class="game-card-name">Скрытая карта</span>
+                                    <span class="game-card-type ${cardType}">${cardTypeLabel}</span>
+                                </div>
+                                <div class="game-card-desc">Условие или действие будет раскрыто при использовании или срабатывании...</div>
+                                <div class="game-card-status">${cardStatus}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
             return `
                 <div class="card-wrapper">
                     <div class="card">
@@ -573,6 +735,7 @@
                         </div>
                         <div class="player-name">${player.name || 'Неизвестный'}</div>
                         ${statsHtml}
+                        ${cardHtml}
                         ${isMe ? '<div class="swipe-hint">👆 Свайпай для просмотра других игроков</div>' : ''}
                     </div>
                 </div>
