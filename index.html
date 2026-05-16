@@ -599,7 +599,7 @@
             document.getElementById('themeToggle').textContent = next === 'dark' ? '🌙' : '☀️';
         });
 
-        // Base64 decode
+        // Base64 decode + zlib decompress (pako library or native)
         function decodeBase64(str) {
             try {
                 str = str.replace(/-/g, '+').replace(/_/g, '/');
@@ -610,6 +610,47 @@
                 return new TextDecoder('utf-8').decode(bytes);
             } catch (e) {
                 console.error("Decode error:", e);
+                return null;
+            }
+        }
+
+        // Zlib decompress using native CompressionStream API (modern browsers)
+        async function decompressZlib(bytes) {
+            try {
+                const stream = new Response(bytes).body;
+                const decompressed = stream.pipeThrough(new DecompressionStream('deflate'));
+                const result = await new Response(decompressed).arrayBuffer();
+                return new TextDecoder('utf-8').decode(result);
+            } catch (e) {
+                console.error("Zlib decompress failed:", e);
+                return null;
+            }
+        }
+
+        // Try to decompress data (handles both plain JSON and zlib-compressed)
+        async function decodeData(b64) {
+            try {
+                // First try plain base64 JSON (backward compatibility)
+                const plain = decodeBase64(b64);
+                if (plain && plain.startsWith('{')) {
+                    return JSON.parse(plain);
+                }
+
+                // Try zlib decompression
+                const str = b64.replace(/-/g, '+').replace(/_/g, '/');
+                while (str.length % 4) str += '=';
+                const binary = atob(str);
+                const bytes = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+                const decompressed = await decompressZlib(bytes);
+                if (decompressed) {
+                    return JSON.parse(decompressed);
+                }
+
+                return null;
+            } catch (e) {
+                console.error("Data decode failed:", e);
                 return null;
             }
         }
@@ -864,8 +905,8 @@
             updateProgress();
         }
 
-        // Load data
-        function loadData() {
+        // Load data from URL parameter (base64 or zlib-compressed)
+        async function loadData() {
             try {
                 const params = new URLSearchParams(window.location.search);
                 const b64 = params.get('d');
@@ -875,17 +916,44 @@
                     return;
                 }
 
-                const json = decodeBase64(b64);
-                if (!json) throw new Error("Decode failed");
-                const data = JSON.parse(json);
-
-                const newHash = hashData(data);
-                if (newHash !== lastDataHash) {
-                    lastDataHash = newHash;
-                    players = data.players || [];
-                    myId = data.myId || null;
-                    initCarousel();
+                const data = await decodeData(b64);
+                if (!data) {
+                    document.getElementById('track').innerHTML = '<div class="error">❌ Ошибка декодирования данных. Попробуйте открыть заново.</div>';
+                    return;
                 }
+
+                // Handle compact format
+                if (data.m !== undefined) {
+                    myId = data.m;
+                    players = (data.p || []).map(p => ({
+                        id: p.id,
+                        name: p.nm,
+                        chars: Object.fromEntries(Object.entries(p.ch || {}).map(([k, v]) => [k, {
+                            value: v.v || '',
+                            revealed: v.r === 1
+                        }])),
+                        action_card: p.ac ? {
+                            type: 'action',
+                            name: p.ac.n,
+                            desc: p.ac.d,
+                            revealed: p.ac.rv === 1,
+                            used: p.ac.u === 1
+                        } : null,
+                        condition_card: p.cc ? {
+                            type: 'condition', 
+                            name: p.cc.n,
+                            desc: p.cc.d,
+                            revealed: p.cc.rv === 1,
+                            used: p.cc.u === 1
+                        } : null
+                    }));
+                } else {
+                    // Legacy format
+                    myId = data.myId || null;
+                    players = data.players || [];
+                }
+
+                initCarousel();
             } catch (e) {
                 document.getElementById('track').innerHTML = `<div class="error">❌ Ошибка: ${e.message}</div>`;
             }
